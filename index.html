@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Be My Valentine?</title>
+  <style>
+    body {
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    .card {
+      background: white;
+      padding: 40px;
+      border-radius: 25px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      z-index: 2;
+      animation: popIn 1s ease;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.7); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    h1 {
+      color: #ff4d6d;
+      margin-bottom: 15px;
+    }
+
+    #countdown {
+      font-size: 18px;
+      color: #555;
+      margin-bottom: 25px;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 12px 28px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+    }
+
+    #yes {
+      background-color: #ff4d6d;
+      color: white;
+      position: relative;
+    }
+
+    #no {
+      background-color: #ccc;
+      color: #333;
+      position: absolute;
+    }
+
+    /* Screen shake */
+    .shake {
+      animation: shake 0.3s infinite;
+    }
+
+    @keyframes shake {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(4px, -4px); }
+      50% { transform: translate(-4px, 4px); }
+      75% { transform: translate(4px, 4px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    /* Sparks & fireworks */
+    .spark, .firework {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .spark {
+      animation: spark 1s linear forwards;
+    }
+
+    .firework {
+      animation: boom 1.5s ease-out forwards;
+    }
+
+    @keyframes spark {
+      from { transform: scale(1); opacity: 1; }
+      to { transform: scale(2.5); opacity: 0; }
+    }
+
+    @keyframes boom {
+      from { transform: scale(0.4); opacity: 1; }
+      to { transform: scale(2); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background music (initial click) -->
+  <audio id="music" loop>
+    <source src="smriti-song.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="card">
+    <h1>
+      My beautiful baby Smriti,<br>
+      will you be my Valentine? 💖
+    </h1>
+    <div id="countdown"></div>
+    <button id="yes">Yes 💘</button>
+    <button id="no">No 💔</button>
+  </div>
+
+  <script>
+    const yesBtn = document.getElementById("yes");
+    const noBtn = document.getElementById("no");
+    const music = document.getElementById("music");
+    const countdownEl = document.getElementById("countdown");
+
+    /* Start music on first click anywhere */
+    document.addEventListener("click", () => {
+      music.play().catch(() => {});
+    }, { once: true });
+
+    /* NO button runs away from cursor or touch */
+    function evade(e) {
+      const rect = noBtn.getBoundingClientRect();
+      const x = e.clientX || e.touches?.[0].clientX;
+      const y = e.clientY || e.touches?.[0].clientY;
+
+      const distance = Math.hypot(
+        x - (rect.left + rect.width / 2),
+        y - (rect.top + rect.height / 2)
+      );
+
+      if (distance < 140) moveNo();
+    }
+
+    document.addEventListener("mousemove", evade);
+    document.addEventListener("touchstart", evade);
+
+    function moveNo() {
+      const maxX = window.innerWidth - noBtn.offsetWidth;
+      const maxY = window.innerHeight - noBtn.offsetHeight;
+      noBtn.style.left = Math.random() * maxX + "px";
+      noBtn.style.top = Math.random() * maxY + "px";
+    }
+
+    /* YES button click → sparks + fireworks + shake + vibration */
+    yesBtn.addEventListener("click", () => {
+      const rect = yesBtn.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      // Screen shake
+      document.body.classList.add("shake");
+
+      // Phone vibration
+      if (navigator.vibrate) {
+        navigator.vibrate([200,100,200,100,300]);
+      }
+
+      // FX interval
+      const fxInterval = setInterval(() => {
+        createSpark(centerX, centerY);
+        createFirework(centerX, centerY);
+      }, 120);
+
+      // Stop FX after 5 seconds → show final page
+      setTimeout(() => {
+        clearInterval(fxInterval);
+        document.body.classList.remove("shake");
+        finalScreen();
+      }, 5000);
+    });
+
+    /* Create sparks */
+    function createSpark(x, y) {
+      const s = document.createElement("div");
+      s.className = "spark";
+      s.innerHTML = "✨";
+      s.style.left = x + (Math.random() * 80 - 40) + "px";
+      s.style.top = y + (Math.random() * 80 - 40) + "px";
+      s.style.fontSize = Math.random() * 14 + 12 + "px";
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 1000);
+    }
+
+    /* Create fireworks */
+    function createFirework(x, y) {
+      const f = document.createElement("div");
+      f.className = "firework";
+      f.innerHTML = "🎆";
+      f.style.left = x + (Math.random() * 120 - 60) + "px";
+      f.style.top = y + (Math.random() * 120 - 60) + "px";
+      f.style.fontSize = Math.random() * 30 + 20 + "px";
+      document.body.appendChild(f);
+      setTimeout(() => f.remove(), 1500);
+    }
+
+    /* FINAL PAGE WITH HER SONG */
+    function finalScreen() {
+      document.body.innerHTML = `
+        <div style="
+          display:flex;
+          justify-content:center;
+          align-items:center;
+          height:100vh;
+          background:linear-gradient(135deg,#ff9a9e,#fad0c4);
+          font-family:Arial;
+          text-align:center;
+          flex-direction:column;
+        ">
+          <h1 style="color:white;font-size:46px;">
+            💕 SHE SAID YES 💕<br><br>
+            Smriti, you make my world brighter every day.<br>
+            Happy Valentine’s Day 💖
+          </h1>
+          <audio id="finalMusic" autoplay loop>
+            <source src="smriti-song.mp3" type="audio/mpeg">
+          </audio>
+        </div>
+      `;
+      const finalMusic = document.getElementById("finalMusic");
+      finalMusic.play().catch(() => {});
+    }
+
+    /* COUNTDOWN TO VALENTINE’S DAY 2026 */
+    const valentine = new Date("Feb 14, 2026 00:00:00").getTime();
+    setInterval(() => {
+      const now = new Date().getTime();
+      const diff = valentine - now;
+
+      const d = Math.floor(diff / (1000*60*60*24));
+      const h = Math.floor((diff / (1000*60*60)) % 24);
+      const m = Math.floor((diff / (1000*60)) % 60);
+
+      countdownEl.innerHTML = diff > 0 
+        ? `⏳ Valentine’s Day in ${d}d ${h}h ${m}m`
+        : `💖 It’s Valentine’s Day 💖`;
+    }, 1000);
+  </script>
+</body>
+</html>
